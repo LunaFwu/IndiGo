@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndiGo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/hint/show-hint.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/fold/foldgutter.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap');
+        
+        :root {
+            
+            --aurora-bg: #22272e;
+            --aurora-bg-light: #2d333b;
+            --aurora-bg-lighter: #373e47;
+            --aurora-teal: #6bdfff;
+            --aurora-green: #7ee787;
+            --aurora-purple: #b388ff;
+            --aurora-blue: #58a6ff;
+            --aurora-vibrant: #33b1ff;
+            --aurora-orange: #ffa94d;
+            --aurora-pink: #ff85c0;
+            --aurora-red: #ff7a85;
+            --aurora-yellow: #ffdf5d;
+            
+            
+            --background: var(--aurora-bg);
+            --surface: var(--aurora-bg-light);
+            --surface-light: var(--aurora-bg-lighter);
+            --primary: var(--aurora-teal);
+            --secondary: var(--aurora-purple);
+            --accent: var(--aurora-green);
+            --text: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            
+            
+            --comment-color: #768390;
+            --highlight: rgba(107, 223, 255, 0.12);
+            --subtle-bg: rgba(99, 110, 123, 0.2);
+            --border-radius: 12px;
+            --button-radius: 8px;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            --hover-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(34, 39, 46, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        
+
+        .app-container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            grid-template-columns: 1fr;
+            height: 100vh;
+            width: 100vw;
+            background-color: var(--background);
+            color: var(--text);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: center;
+            height: 50px;
+            align-items: center;
+            padding: 0 1.5rem;
+            background: linear-gradient(145deg, var(--aurora-bg-light), var(--aurora-bg));
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            z-index: 10;
+            -webkit-app-region: drag;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.4rem;
+            background: linear-gradient(to right, var(--aurora-teal), var(--aurora-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            cursor: default;
+        }
+
+        .minimize:hover {
+            background-color: var(--tokyo-yellow);
+        }
+
+        .close:hover {
+            background-color: var(--tokyo-red);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+            overflow: hidden;
+            padding: 0;
+            background-color: var(--background);
+            position: relative;
+        }
+
+        .content-wrapper {
+            display: grid;
+            grid-template-rows: 1fr;
+            min-height: 0;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .component-container {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border-radius: var(--border-radius);
+        }
+
+        .content-area {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .tabs-container {
+            background-color: var(--background);
+            overflow-y: hidden;
+            border-bottom: 1px solid var(--border-color);
+            margin-top: 0;
+        }
+
+        .tabs-row {
+            display: flex;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            height: 45px;
+            align-items: center;
+            flex-wrap: nowrap;
+            position: relative;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 0 16px;
+        }
+
+        .tabs-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tabs-scroll-area {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            flex: 1;
+            min-width: 0;
+            margin-right: 8px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tabs-scroll-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--highlight);
+            color: var(--aurora-vibrant);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--button-radius);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-button:hover {
+            background-color: var(--aurora-vibrant);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .help-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--highlight);
+            color: var(--aurora-vibrant);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--button-radius);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            
+        }
+
+        .help-button:hover {
+            background-color: var(--aurora-vibrant);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-width: 120px;
+            height: 36px;
+            background-color: var(--surface);
+            border-radius: var(--button-radius);
+            margin-right: 4px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            position: relative;
+            transition: all 0.2s;
+            padding: 0 16px;
+            border: 1px solid transparent;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .tab.active {
+            background: linear-gradient(145deg, var(--aurora-bg-light), var(--aurora-bg-lighter));
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 8px rgba(107, 223, 255, 0.2);
+        }
+
+        .tab:hover:not(.active) {
+            background-color: var(--aurora-bg-lighter);
+            border-color: var(--border-color);
+            transform: translateY(-1px);
+        }
+
+        .new-tab-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background-color: var(--highlight);
+            border-radius: var(--button-radius);
+            margin-left: 8px;
+            margin-right: 4px;
+            cursor: pointer;
+            color: var(--aurora-vibrant);
+            transition: all 0.3s;
+            flex-shrink: 0;
+            align-self: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .new-tab-button:hover {
+            background-color: var(--aurora-vibrant);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .tab-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: small;
+            background-color: transparent;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            border-radius: 50%;
+            border: none;
+            margin-left: auto;
+            padding: 4px;
+            height: 16px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .tab-close:hover {
+            background-color: var(--aurora-red);
+            color: white;
+            cursor: pointer;
+        }
+
+        .tab-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 120px;
+            cursor: text;
+            font-weight: 500;
+        }
+
+        .tab-name-input {
+            background: var(--surface-light);
+            color: var(--text);
+            border: 1px solid var(--aurora-teal);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.9rem;
+            width: 80%;
+            max-width: 120px;
+            outline: none;
+        }
+
+        .tab-content {
+            flex: 1 1 0%;
+            min-height: 0;
+            overflow: auto;
+            background-color: var(--background);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        .editor-container {
+            flex: 1 1 0%;
+            min-height: 0;
+            height: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            position: relative;
+        }
+
+        .code-editor-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface);
+        }
+
+        .editor-language {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .code-editor {
+            width: 100%;
+            height: calc(100vh - 170px); 
+            background-color: var(--surface);
+            color: var(--text);
+            font-family: "Fira Code", "JetBrains Mono", monospace;
+            font-size: 14px;
+            padding: 0;
+            border: none;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--subtle-bg);
+            border-radius: 8px;
+            border: 2px solid var(--surface);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--comment-color);
+        }
+
+        .app-footer {
+            background: linear-gradient(to right, var(--aurora-bg), var(--aurora-bg-light));
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            z-index: 10;
+            position: relative;
+        }
+        
+        .footer-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 100px;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--comment-color);
+        }
+        
+        .status-indicator.online {
+            background-color: var(--aurora-green);
+            box-shadow: 0 0 8px rgba(126, 231, 135, 0.5);
+        }
+        
+        .status-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .footer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            min-width: 100px;
+            justify-content: flex-end;
+        }
+
+        .footer-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .footer-action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, var(--aurora-bg-light), var(--aurora-bg));
+            color: var(--aurora-teal);
+            border: 1px solid var(--border-color);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .footer-action-button:hover {
+            background: linear-gradient(145deg, var(--aurora-bg-lighter), var(--aurora-bg-light));
+            color: var(--aurora-purple);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            border-color: var(--aurora-purple);
+        }
+
+        .run-button {
+            background: linear-gradient(145deg, var(--aurora-teal), var(--aurora-vibrant));
+            color: white;
+            width: 64px;
+            height: 64px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            transform: rotate(0deg);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+
+        .run-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .run-button:hover::before {
+            transform: translateX(100%);
+        }
+
+        .run-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .run-button:hover {
+            background: linear-gradient(145deg, var(--aurora-vibrant), var(--aurora-blue));
+            transform: translateY(-4px) scale(1.05) rotate(0deg);
+            box-shadow: 0 10px 20px rgba(51, 177, 255, 0.3);
+            border: none;
+        }
+        
+        .run-button:active {
+            transform: translateY(0) scale(0.98) rotate(0deg);
+            box-shadow: 0 3px 10px rgba(51, 177, 255, 0.2);
+        }
+        
+        .run-button:hover::after {
+            opacity: 1;
+        }
+
+        .running {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(107, 223, 255, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(107, 223, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(107, 223, 255, 0);
+            }
+        }
+
+        .footer-action-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+        }
+
+        .run-button .footer-action-icon {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .CodeMirror {
+            font-family: "Fira Code", "JetBrains Mono", monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            height: calc(100vh - 140px);
+            background-color: var(--surface) !important;
+            color: var(--text) !important;
+            border-radius: 0; 
+            padding: 0; 
+        }
+        
+        .CodeMirror-gutters {
+            background-color: var(--aurora-bg-light) !important;
+            border-right: 1px solid var(--border-color) !important;
+            border-radius: 0;
+        }
+        
+        .CodeMirror-linenumber {
+            color: var(--comment-color) !important;
+            font-size: 12px;
+            padding: 0 12px 0 8px !important;
+        }
+        
+        .CodeMirror-cursor {
+            border-left: 2px solid var(--aurora-teal) !important;
+        }
+        
+        .CodeMirror-selected {
+            background-color: rgba(107, 223, 255, 0.15) !important;
+        }
+        
+        .CodeMirror-activeline-background {
+            background-color: rgba(107, 223, 255, 0.07) !important;
+        }
+        
+        .cm-keyword {
+            color: var(--aurora-purple) !important;
+            font-weight: 500;
+        }
+        
+        .cm-operator {
+            color: var(--aurora-teal) !important;
+        }
+        
+        .cm-string {
+            color: var(--aurora-green) !important;
+        }
+        
+        .cm-number {
+            color: var(--aurora-orange) !important;
+        }
+        
+        .cm-comment {
+            color: var(--comment-color) !important;
+            font-style: italic;
+        }
+        
+        .cm-variable {
+            color: var(--text) !important;
+        }
+        
+        .cm-def {
+            color: var(--aurora-blue) !important;
+            font-weight: 500;
+        }
+        
+        .cm-builtin {
+            color: var(--aurora-vibrant) !important;
+        }
+        
+        .cm-atom {
+            color: var(--aurora-pink) !important;
+        }
+        
+        .cm-property {
+            color: var(--aurora-teal) !important;
+        }
+        
+        .CodeMirror-hints {
+            background-color: var(--surface-light) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            max-height: 250px;
+            padding: 6px 0;
+        }
+        
+        .CodeMirror-hint {
+            color: var(--text) !important;
+            padding: 6px 12px;
+            border-radius: 0;
+            max-width: none;
+            font-family: "Fira Code", monospace;
+        }
+        
+        li.CodeMirror-hint-active {
+            background-color: var(--highlight) !important;
+            color: var(--aurora-teal) !important;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-header {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+            padding-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <main class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#6bdfff" />
+                    <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="#6bdfff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="logo-text">IndiGo</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="content-wrapper">
+                <div class="content-area">
+                    <div id="editor-tab" class="tab-section">
+                        <div class="tabs-container">
+                            <div class="tabs-row">
+                                <div class="tabs-scroll-area" id="tabs-container">
+                                    <div class="tab active" data-tab-id="main">
+                                        <span class="tab-name">Main</span>
+                                    </div>=
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content">
+                            <div class="editor-container fade-in">
+                                <div class="code-editor-wrapper">
+                                    <div id="code-editor" class="code-editor"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <div class="footer-status">
+                <div class="status-indicator online"></div>
+                <span class="status-text">Ready</span>
+            </div>
+            <div class="footer-actions">                
+                <button class="footer-action-button run-button" id="run-btn" title="Run" aria-label="Run">
+                    <svg class="footer-action-icon" viewBox="0 0 24 24">
+                        <path d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="footer-info">
+                <button class="footer-action-button" id="help-btn" title="Keyboard Shortcuts" aria-label="Help">
+                    <svg class="footer-action-icon" viewBox="0 0 24 24">
+                        <path d="M11,18H13V16H11V18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,6A4,4 0 0,0 8,10H10A2,2 0 0,1 12,8A2,2 0 0,1 14,10C14,12 11,11.75 11,15H13C13,12.75 16,12.5 16,10A4,4 0 0,0 12,6Z" />
+                    </svg>
+                </button>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+      const ipcRenderer = require('electron').ipcRenderer;
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('keydown', function(e) {
+                if ((e.metaKey) && e.key === 't') {
+                    e.preventDefault();
+                    const newTabBtn = document.getElementById('new-tab-btn');
+                    if (newTabBtn) newTabBtn.click();
+                }
+                
+                if ((e.metaKey) && e.key === 'w') {
+                    e.preventDefault();
+                    if (activeTabId) {
+                        closeTab(activeTabId);
+                    }
+                }
+                
+                if ((e.metaKey) && !isNaN(parseInt(e.key)) && parseInt(e.key) >= 1 && parseInt(e.key) <= 9) {
+                    e.preventDefault();
+                    const tabIndex = parseInt(e.key) - 1;
+                    if (tabs[tabIndex]) {
+                        switchTab(tabs[tabIndex].id);
+                    }
+                }
+            });
+            
+            const codeEditorElement = document.getElementById('code-editor');
+            const editor = CodeMirror(codeEditorElement, {
+                mode: "text/javascript", 
+                theme: "default",     
+                lineNumbers: true,
+                lineWrapping: true,
+                styleActiveLine: true,
+                matchBrackets: true,
+                autoCloseBrackets: true,
+                indentUnit: 4,
+                tabSize: 4,
+                indentWithTabs: false,
+                autofocus: true,
+                showTrailingSpace: true,
+                foldGutter: true,
+                extraKeys: {
+                    "Tab": function(cm) {
+                        if (cm.somethingSelected()) {
+                            cm.indentSelection("add");
+                        } else {
+                            cm.replaceSelection("    ", "end");
+                        }
+                    },
+                    "Ctrl-Space": "autocomplete",
+                    "Cmd-/": "toggleComment",
+                    "Ctrl-/": "toggleComment"
+                },
+                gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+            
+            
+            const keywords = [
+                "break", "case", "catch", "continue", "debugger", "default", 
+                "delete", "do", "else", "finally", "for", "function", "if", 
+                "in", "instanceof", "new", "return", "switch", "this", "throw", 
+                "try", "typeof", "var", "void", "while", "with", "class", 
+                "const", "enum", "export", "extends", "import", "super"
+            ];
+            
+            const functions = [
+                "Object", "Function", "Boolean", "Symbol", "Error", "EvalError", 
+                "InternalError", "RangeError", "ReferenceError", "SyntaxError", 
+                "TypeError", "URIError", "Number", "Math", "Date", "String", 
+                "RegExp", "Array", "Int8Array", "Uint8Array", "Uint8ClampedArray", 
+                "Int16Array", "Uint16Array", "Int32Array", "Uint32Array", 
+                "Float32Array", "Float64Array", "Map", "Set", "WeakMap", "WeakSet", 
+                "Promise", "console", "JSON"
+            ];
+            
+            editor.on("inputRead", function(cm, change) {
+                if (change.origin !== '+input') return;
+                const cur = cm.getCursor();
+                const token = cm.getTokenAt(cur);
+                
+                if (token.type !== null && /\w/.test(change.text[0])) {
+                    CodeMirror.commands.autocomplete(cm, null, {
+                        completeSingle: false,
+                        hint: function(editor) {
+                            const cursor = editor.getCursor();
+                            const token = editor.getTokenAt(cursor);
+                            const start = token.start;
+                            const end = cursor.ch;
+                            const line = cursor.line;
+                            const currentWord = token.string;
+                            
+                            const wordList = [
+                                ...keywords,
+                                ...functions
+                            ];
+                            
+                            const doc = editor.getValue();
+                            const allWords = doc.match(/\w{3,}/g) || [];
+                            const uniqueWords = [...new Set(allWords)];
+                            
+                            const allSuggestions = [
+                                ...wordList,
+                                ...uniqueWords
+                            ].filter(word => 
+                                word.startsWith(currentWord) && 
+                                word !== currentWord
+                            );
+                            
+                            const uniqueSuggestions = [...new Set(allSuggestions)];
+                            
+                            return {
+                                list: uniqueSuggestions.sort(),
+                                from: CodeMirror.Pos(line, start),
+                                to: CodeMirror.Pos(line, end)
+                            };
+                        }
+                    });
+                }
+            });
+            
+            const tabsContainer = document.getElementById('tabs-container');
+            
+            let tabs = [{
+                id: 'main',
+                name: 'Main',
+                content: ''
+            }];
+            let activeTabId = 'main';
+
+            function renderTabs() {
+                tabsContainer.innerHTML = '';
+                
+                tabs.forEach((tab, index) => {
+                    const tabElement = document.createElement('div');
+                    tabElement.className = `tab`;
+                    tabElement.dataset.tabId = tab.id;
+                    if (tab.id === activeTabId) {
+                        tabElement.classList.add('active');
+                    }
+                    
+                    if (index < 9) {
+                        tabElement.title = `Switch to tab (⌘${index + 1})`;
+                    }
+                    
+                    const tabName = document.createElement('span');
+                    tabName.className = 'tab-name';
+                    tabName.textContent = tab.name;
+                    tabName.addEventListener('dblclick', function(e) {
+                        startEditingTab(tab.id, e);
+                    });
+                    
+                    tabElement.appendChild(tabName);
+                    
+                    const closeBtn = document.createElement('button');
+                    closeBtn.className = 'tab-close';
+                    closeBtn.textContent = '×';
+                    closeBtn.title = 'Close Tab (⌘W)';
+                    closeBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        closeTab(tab.id);
+                    });
+                    tabElement.appendChild(closeBtn);
+                    
+                    tabElement.addEventListener('click', function() {
+                        switchTab(tab.id);
+                    });
+                    
+                    tabsContainer.appendChild(tabElement);
+                });
+                
+                const newTabButton = document.createElement('button');
+                newTabButton.className = 'new-tab-button';
+                newTabButton.id = 'new-tab-btn';
+                newTabButton.title = 'New Tab (⌘T)';
+                
+                const plusIcon = document.createElement('span');
+                plusIcon.className = 'plus-icon';
+                plusIcon.textContent = '+';
+                
+                newTabButton.appendChild(plusIcon);
+                newTabButton.addEventListener('click', function() {
+                    const newId = `tab-${Date.now()}`;
+                    const newTab = {
+                        id: newId,
+                        name: `Script ${tabs.length + 1}`,
+                        content: ''
+                    };
+                    
+                    tabs.push(newTab);
+                    renderTabs();
+                    switchTab(newId);
+                });
+                
+                tabsContainer.appendChild(newTabButton);
+            }
+
+            function switchTab(tabId) {
+                const currentTab = tabs.find(t => t.id === activeTabId);
+                if (currentTab) {
+                    currentTab.content = editor.getValue();
+                }
+                
+                activeTabId = tabId;
+                const tab = tabs.find(t => t.id === tabId);
+                if (tab) {
+                    editor.setValue(tab.content);
+                    editor.clearHistory(); 
+                }
+                
+                renderTabs();
+            }
+
+            function closeTab(tabId) {
+                if (tabs.length <= 1) {
+                    const tab = tabs.find(t => t.id === tabId);
+                    if (tab) {
+                        tab.content = '';
+                        editor.setValue('');
+                        editor.clearHistory();
+                    }
+                    return;
+                }
+                
+                const tabIndex = tabs.findIndex(t => t.id === tabId);
+                tabs = tabs.filter(t => t.id !== tabId);
+                
+                if (activeTabId === tabId) {
+                    const newActiveIndex = Math.min(tabIndex, tabs.length - 1);
+                    activeTabId = tabs[newActiveIndex].id;
+                    editor.setValue(tabs[newActiveIndex].content);
+                    editor.clearHistory();
+                }
+                
+                renderTabs();
+            }
+
+            function startEditingTab(tabId, event) {
+                event.stopPropagation();
+                
+                const tabElement = document.querySelector(`.tab[data-tab-id="${tabId}"]`);
+                const tabNameElement = tabElement.querySelector('.tab-name');
+                const currentName = tabNameElement.textContent;
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'tab-name-input';
+                input.value = currentName;
+                input.style.maxWidth = '120px';
+                input.style.width = '70%';
+                
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        saveTabName(tabId, this.value);
+                    } else if (e.key === 'Escape') {
+                        renderTabs();
+                    }
+                });
+                
+                input.addEventListener('blur', function() {
+                    saveTabName(tabId, this.value);
+                });
+                
+                tabNameElement.replaceWith(input);
+                input.focus();
+                input.select();
+            }
+
+            function saveTabName(tabId, newName) {
+                const tab = tabs.find(t => t.id === tabId);
+                if (tab && newName.trim() !== '') {
+                    tab.name = newName.trim();
+                }
+                renderTabs();
+            }
+
+            renderTabs();
+
+            editor.on('change', function() {
+                const currentTab = tabs.find(t => t.id === activeTabId);
+                if (currentTab) {
+                    currentTab.content = editor.getValue();
+                }
+            });
+
+            document.getElementById('run-btn').addEventListener('click', function() {
+                const scriptContent = editor.getValue();
+                console.log('Running script:', scriptContent);
+                
+                
+                const runBtn = this;
+                runBtn.classList.add('running');
+                
+                
+                const statusIndicator = document.querySelector('.status-indicator');
+                const statusText = document.querySelector('.status-text');
+                
+                statusIndicator.classList.remove('online');
+                statusText.textContent = 'Running...';
+                const code = scriptContent.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                ipcRenderer.send("invokeAction", { code });
+                ipcRenderer.once("actionReply", (event, result) => {
+                  console.log("Result:", result);
+                  if (result.startsWith("Error:")) {
+                    statusText.textContent = "Failed";
+                    statusIndicator.classList.remove('online');
+                    setTimeout(() => {
+                      statusText.textContent = 'Ready';
+                      runBtn.classList.remove('running');
+                      statusIndicator.classList.remove('error');
+                      statusIndicator.classList.add('online');
+                    }, 2000);
+                  } else {
+                    statusIndicator.classList.add('online');
+                    statusText.textContent = 'Done'; 
+                    setTimeout(() => {
+                      statusText.textContent = 'Ready';
+                      runBtn.classList.remove('running');
+                    }, 2000);   
+                  }
+                });
+            });
+
+            document.getElementById('help-btn').addEventListener('click', function() {
+                alert('Keyboard Shortcuts:\n\n⌘T: New Tab\n⌘W: Close Tab\n⌘1-9: Switch Tab\n\nImportant information on this software: https://www.youtube.com/watch?v=AAHGZVxN5Uc');
+            });
+            
+            
+        });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/hint/anyword-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/comment/comment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/edit/trailingspace.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/fold/brace-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/fold/comment-fold.min.js"></script>
+</body>
+</html>
